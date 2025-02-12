@@ -16,7 +16,7 @@ import { toBody, parseBody } from "@applemusic-like-lyrics/ws-protocol";
 import { enableWSPlayer, wsPlayerURL } from "../components/config/atoms";
 import { debounce } from "../utils/debounce";
 import { lyricLinesAtom } from "../lyric/provider";
-import type { MusicStatusGetterEvents } from ".";
+import { PlayState } from ".";
 import { ConnectionColor, wsConnectionStatusAtom } from "./ws-states";
 import type { WSBodyMap, WSBodyMessageMap } from "./ws-types.js";
 
@@ -30,7 +30,7 @@ export const WebSocketWrapper: FC = () => {
 	const musicContext = useAtomValue(musicContextAtom);
 	const playProgress = useAtomValue(currentTimeAtom);
 	const volume = useAtomValue(currentVolumeAtom);
-	const currentPlayMode = useAtomValue(playStatusAtom);
+	const playStatus = useAtomValue(playStatusAtom);
 	const setWSStatus = useSetAtom(wsConnectionStatusAtom);
 	const enabled = useAtomValue(enableWSPlayer);
 	const url = useAtomValue(wsPlayerURL);
@@ -107,6 +107,14 @@ export const WebSocketWrapper: FC = () => {
 			imgUrl: musicCover,
 		});
 	}, [musicCover, sendWSMessage]);
+
+	useEffect(() => {
+		if (playStatus === PlayState.Pausing) {
+			sendWSMessage("onPaused");
+		} else if (playStatus === PlayState.Playing) {
+			sendWSMessage("onResumed");
+		}
+	}, [playStatus, sendWSMessage]);
 
 	// useEffect(() => {
 	// 	if (musicContext && ws.current?.readyState === WebSocket.OPEN) {
