@@ -31,7 +31,7 @@ export const WebSocketWrapper: FC = () => {
 	const playProgress = useAtomValue(currentTimeAtom);
 	const volume = useAtomValue(currentVolumeAtom);
 	const playStatus = useAtomValue(playStatusAtom);
-	const [wsStateus, setWSStatus] = useAtom(wsConnectionStatusAtom);
+	const [wsStatus, setWSStatus] = useAtom(wsConnectionStatusAtom);
 	const enabled = useAtomValue(enableWSPlayer);
 	const url = useAtomValue(wsPlayerURL);
 	const ws = useRef<WebSocket>();
@@ -58,6 +58,7 @@ export const WebSocketWrapper: FC = () => {
 	}, []);
 
 	useEffect(() => {
+		if (wsStatus.color !== ConnectionColor.Active) return;
 		sendWSMessage("setMusicInfo", {
 			musicId,
 			musicName,
@@ -69,21 +70,24 @@ export const WebSocketWrapper: FC = () => {
 			})),
 			duration: musicDuration,
 		});
-	}, [musicId, musicName, musicDuration, artists, sendWSMessage]);
+	}, [musicId, musicName, musicDuration, artists, wsStatus, sendWSMessage]);
 
 	useEffect(() => {
+		if (wsStatus.color !== ConnectionColor.Active) return;
 		sendWSMessage("onPlayProgress", {
 			progress: playProgress,
 		});
-	}, [playProgress, sendWSMessage]);
+	}, [playProgress, sendWSMessage, wsStatus]);
 
 	useEffect(() => {
+		if (wsStatus.color !== ConnectionColor.Active) return;
 		sendWSMessage("setVolume", {
 			volume: volume,
 		});
-	}, [volume, sendWSMessage]);
+	}, [volume, sendWSMessage, wsStatus]);
 
 	useEffect(() => {
+		if (wsStatus.color !== ConnectionColor.Active) return;
 		if (lyricLines.state === "hasData") {
 			const clampTime = (time: number) =>
 				Math.min(Number.MAX_SAFE_INTEGER, Math.max(0, time | 0));
@@ -100,24 +104,26 @@ export const WebSocketWrapper: FC = () => {
 				})),
 			});
 		}
-	}, [lyricLines, sendWSMessage]);
+	}, [lyricLines, sendWSMessage, wsStatus]);
 
 	useEffect(() => {
+		if (wsStatus.color !== ConnectionColor.Active) return;
 		sendWSMessage("setMusicAlbumCoverImageURI", {
 			imgUrl: musicCover,
 		});
-	}, [musicCover, sendWSMessage]);
+	}, [musicCover, sendWSMessage, wsStatus]);
 
 	useEffect(() => {
+		if (wsStatus.color !== ConnectionColor.Active) return;
 		if (playStatus === PlayState.Pausing) {
 			sendWSMessage("onPaused");
 		} else if (playStatus === PlayState.Playing) {
 			sendWSMessage("onResumed");
 		}
-	}, [playStatus, sendWSMessage]);
+	}, [playStatus, sendWSMessage, wsStatus]);
 
 	useEffect(() => {
-		if (musicContext && wsStateus.color === ConnectionColor.Active && ws.current?.readyState === WebSocket.OPEN) {
+		if (musicContext && wsStatus.color === ConnectionColor.Active && ws.current?.readyState === WebSocket.OPEN) {
 			musicContext.acquireAudioData();
 			const onAudioData = (evt: MusicStatusGetterEvents["audio-data"]) => {
 				ws.current?.send(
@@ -135,7 +141,7 @@ export const WebSocketWrapper: FC = () => {
 				musicContext.releaseAudioData();
 			};
 		}
-	}, [musicContext, wsStateus]);
+	}, [musicContext, wsStatus]);
 
 	useEffect(() => {
 		if (!enabled) {
@@ -251,7 +257,11 @@ export const WebSocketWrapper: FC = () => {
 		};
 		const enqueueConnect = debounce(connect, 5000);
 
-		connect();
+		try {
+			connect();
+		} catch (err) {
+			console.error(err);
+		}
 
 		return () => {
 			webSocket?.close();
