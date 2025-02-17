@@ -1,5 +1,5 @@
 import { type FC, useCallback, useEffect, useRef } from "react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
 	currentTimeAtom,
 	musicArtistsAtom,
@@ -16,7 +16,7 @@ import { toBody, parseBody } from "@applemusic-like-lyrics/ws-protocol";
 import { enableWSPlayer, wsPlayerURL } from "../components/config/atoms";
 import { debounce } from "../utils/debounce";
 import { lyricLinesAtom } from "../lyric/provider";
-import { PlayState } from ".";
+import { PlayState, type MusicStatusGetterEvents } from ".";
 import { ConnectionColor, wsConnectionStatusAtom } from "./ws-states";
 import type { WSBodyMap, WSBodyMessageMap } from "./ws-types.js";
 
@@ -31,7 +31,7 @@ export const WebSocketWrapper: FC = () => {
 	const playProgress = useAtomValue(currentTimeAtom);
 	const volume = useAtomValue(currentVolumeAtom);
 	const playStatus = useAtomValue(playStatusAtom);
-	const setWSStatus = useSetAtom(wsConnectionStatusAtom);
+	const [wsStateus, setWSStatus] = useAtom(wsConnectionStatusAtom);
 	const enabled = useAtomValue(enableWSPlayer);
 	const url = useAtomValue(wsPlayerURL);
 	const ws = useRef<WebSocket>();
@@ -116,26 +116,26 @@ export const WebSocketWrapper: FC = () => {
 		}
 	}, [playStatus, sendWSMessage]);
 
-	// useEffect(() => {
-	// 	if (musicContext && ws.current?.readyState === WebSocket.OPEN) {
-	// 		musicContext.acquireAudioData();
-	// 		const onAudioData = (evt: MusicStatusGetterEvents["audio-data"]) => {
-	// 			ws.current?.send(
-	// 				toBody({
-	// 					type: "onAudioData",
-	// 					value: {
-	// 						data: new Uint8Array(evt.detail.data),
-	// 					},
-	// 				}),
-	// 			);
-	// 		};
-	// 		musicContext.addEventListener("audio-data", onAudioData);
-	// 		return () => {
-	// 			musicContext.removeEventListener("audio-data", onAudioData);
-	// 			musicContext.releaseAudioData();
-	// 		};
-	// 	}
-	// }, [musicContext, ws.current?.readyState]);
+	useEffect(() => {
+		if (musicContext && wsStateus.color === ConnectionColor.Active && ws.current?.readyState === WebSocket.OPEN) {
+			musicContext.acquireAudioData();
+			const onAudioData = (evt: MusicStatusGetterEvents["audio-data"]) => {
+				ws.current?.send(
+					toBody({
+						type: "onAudioData",
+						value: {
+							data: new Uint8Array(evt.detail.data),
+						},
+					}),
+				);
+			};
+			musicContext.addEventListener("audio-data", onAudioData);
+			return () => {
+				musicContext.removeEventListener("audio-data", onAudioData);
+				musicContext.releaseAudioData();
+			};
+		}
+	}, [musicContext, wsStateus]);
 
 	useEffect(() => {
 		if (!enabled) {

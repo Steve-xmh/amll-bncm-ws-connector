@@ -134,7 +134,7 @@ const CopyBetterNCMPlugin = ({
 								if (!result.code) return;
 								await writeFile(destFile, result.code);
 								await writeFile(resolve(srcDir, newName), result.code);
-								await rm(srcFile);
+								// await rm(srcFile);
 								console.log(
 									`Compressed ${srcFile} to ${destFile} (${srcCode.length} -> ${result.code.length})`,
 								);
@@ -177,6 +177,7 @@ const CopyBetterNCMPlugin = ({
 							});
 							const result = await terserMinify(srcCode, {
 								module: true,
+								sourceMap: false,
 								format: {
 									comments: false,
 								},
