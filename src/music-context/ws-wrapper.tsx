@@ -123,7 +123,7 @@ export const WebSocketWrapper: FC = () => {
 	}, [playStatus, sendWSMessage, wsStatus]);
 
 	useEffect(() => {
-		if (musicContext && wsStatus.color === ConnectionColor.Active && ws.current?.readyState === WebSocket.OPEN) {
+		if (musicContext && wsStatus.color === ConnectionColor.Active) {
 			musicContext.acquireAudioData();
 			const onAudioData = (evt: MusicStatusGetterEvents["audio-data"]) => {
 				ws.current?.send(

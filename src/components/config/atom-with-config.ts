@@ -3,7 +3,7 @@ import { normalizePath } from "../../utils/path";
 import { debounce } from "../../utils/debounce";
 import { log, warn } from "../../utils/logger";
 import { type WritableAtom, atom } from "jotai";
-import { Loadable } from "jotai/vanilla/utils/loadable";
+import type { Loadable } from "jotai/vanilla/utils/loadable";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type AMLLStorage = Map<string, any>;
@@ -14,7 +14,7 @@ async function loadConfig(): Promise<Map<string, any>> {
 		let storeValue: any;
 		if ("betterncm" in window) {
 			const configPath = normalizePath(
-				`${plugin.mainPlugin.pluginPath}/../../amll-data/amll-settings.json`,
+				`${plugin.mainPlugin.pluginPath}/../../amll-data/amll-ws-connector-settings.json`,
 			);
 			storeValue = JSON.parse(await betterncm.fs.readFileText(configPath));
 		} else {
@@ -39,7 +39,7 @@ const saveConfig = debounce(async (config: Map<string, any>) => {
 		});
 		if ("betterncm" in window) {
 			const configPath = normalizePath(
-				`${plugin.mainPlugin.pluginPath}/../../amll-data/amll-settings.json`,
+				`${plugin.mainPlugin.pluginPath}/../../amll-data/amll-ws-connector-settings.json`,
 			);
 			const configFolderPath = normalizePath(`${configPath}/..`);
 			if (!(await betterncm.fs.exists(configFolderPath))) {

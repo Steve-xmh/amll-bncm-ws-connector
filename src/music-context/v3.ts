@@ -4,7 +4,7 @@
  */
 
 import {
-	Artist,
+	type Artist,
 	AudioQualityType,
 	MusicContextBase,
 	PlayMode,
@@ -86,6 +86,12 @@ export class MusicContextV3 extends MusicContextBase {
 		}
 		appendRegisterCall("AudioData", "audioplayer", (data: NCMV3AudioData) => {
 			this.fftPlayer.pushDataI16(48000, 2, new Int16Array(data.data));
+			this.dispatchTypedEvent(
+				"audio-data",
+				new CustomEvent("audio-data", {
+					detail: data,
+				}),
+			);
 		});
 		appendRegisterCall("Load", "audioplayer", this.bindedOnMusicLoad);
 		appendRegisterCall("End", "audioplayer", this.bindedOnMusicUnload);

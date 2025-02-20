@@ -196,7 +196,7 @@ const CopyBetterNCMPlugin = ({
 					zip.file(newName, createReadStream(resolve(fullDistDir, newName)));
 				}
 				await writeFile(
-					resolve(fullDistDir, "AMLL WS Connector.plugin"),
+					resolve(fullDistDir, "AMLL.WS.Connector.plugin"),
 					await zip.generateAsync({
 						type: "nodebuffer",
 						compression: "DEFLATE",
