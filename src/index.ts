@@ -96,7 +96,6 @@ async function initDevelopmentReload() {
 
 // 配置页面
 plugin.onConfig(() => {
-	console.log("AMLL Config", configViewElement);
 	return configViewElement;
 });
 
@@ -118,7 +117,15 @@ plugin.onLoad(async () => {
 		}
 
 		if (isNCMV3()) {
+			log("正在等待页面加载完成...");
 			await betterncm.utils.waitForElement("#root");
+			log("正在尝试获取 Store 状态对象...");
+			await betterncm.utils.waitForFunction(() => {
+				const store = (document.getElementById("root") as any)
+					?._reactRootContainer?._internalRoot?.current?.child?.child
+					?.memoizedProps?.store;
+				return !!store;
+			});
 		}
 
 		initLyricPage();

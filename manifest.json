@@ -7,9 +7,9 @@
         "https://github.com/Steve-xmh",
         "https://github.com/Steve-xmh/applemusic-like-lyrics"
     ],
-    "description": "类 Apple Music 歌词页面插件|近乎完美的 Apple Music 歌词体验",
+    "description": "类苹果歌词 WS 互联插件",
     "preview": "preview.svg",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "commit": "!SET_BY_BUILD_SCRIPT!",
     "branch": "!SET_BY_BUILD_SCRIPT!",
     "type": "extension",
